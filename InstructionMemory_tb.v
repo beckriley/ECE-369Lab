@@ -21,6 +21,45 @@ module InstructionMemory_tb();
 	initial begin
 	
     /* Please fill in the implementation here... */
+	/* WORK IN PROGRESS */
+	Address <= 0;
+    #10;
+    
+    Address <= 1;
+    #10;
+    
+    Address <= 2;
+    #10;
+    
+    Address <= 3;
+    #10;
+    
+    Address <= 4;
+    #10;
+    
+    Address <= 5;
+    #10;
+    
+    Address <= 6;
+    #10;
+    
+    Address <= 7;
+    #10;
+    
+    Address <= 8;
+    #10;
+    
+    Address <= 9;
+    #10;
+    
+    Address <= 10;
+    #100;
+    
+    Address <= 100;
+    #100;
+    
+    Address <= 1000;
+    #100;
 	
 	end
 
