@@ -21,6 +21,14 @@ module PCAdder_tb();
 	initial begin
 	
     /* Please fill in the implementation here... */
+		PCResult = 32'h00000000;
+		#100;
+
+		PCResult = 32'h00000004;
+		#100;
+
+		PCResult = 32'h00000064;
+		#100;
 	
 	end
 
