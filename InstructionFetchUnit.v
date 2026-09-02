@@ -2,7 +2,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Team Members: Beck Riley, Erick Figueroa, Earl Sangalang
-// Overall percent effort of each team meber: 
+// Overall percent effort of each team member: 33%
 // 
 // ECE369A - Computer Architecture
 // Laboratory 3 (PostLab)
