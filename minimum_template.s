@@ -108,23 +108,23 @@ MaxIndex:
     addi    $t1,$0, 1 #i = 1
     add     $t3,$0, 0 #$t3 = 0
 
-loop:
-    bge     $t1,$a1, done #i>=n exits loops
+Maxloop:
+    bge     $t1,$a1, Maxdone #i>=n exits loops
     mul     $t2,$t1, 4
     add     $t2,$t2, $a0 
     lw      $t2, 0($t2) #$t2 = V[i]
-    ble       $t2,$t0, next #V[i] <= max
-    add       $t0,$t2,$0 #max = V[i]
-    add       $t3,$t1,$0 #max_index=max
+    ble     $t2,$t0, Maxnext #V[i] <= max
+    add     $t0,$t2,$0 #max = V[i]
+    add     $t3,$t1,$0 #max_index=max
 
-next:
-    addi $t1,$t1,1 #i++
-    j    loop
+Maxnext:
+    addi    $t1,$t1,1 #i++
+    j       Maxloop
 
 
-done:
-    add       $v0,$t3,$0
-    jr        $ra
+Maxdone:
+    add     $v0,$t3,$0
+    jr      $ra
     # Your code ends
 
     
