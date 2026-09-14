@@ -12,6 +12,10 @@
 #
 # Questions:-
 # 1. Briefly describe the purposes of the registers, $t0, $t1, $t2, and $t3.
+#	 $t0 is used as a temporary character in order to compare it to the chosen character in $t3, incrementing through the entire string.
+#	 $t1 is the indexing character of "str", used to go through every character in "str" and to be called for $t0.
+#	 $t2 is the count of the number of "char" that is in "str".
+#
 # 2. Currently, the program is stuck in an infinite loop. Make use of 
 #    breakpoints to locate, and correct the error.
 
@@ -34,7 +38,7 @@ loop:
 
 con:	
 
-    add     $t1, $t2, 1	    # increase indexing register $t1
+    add     $t1, $t1, 1	    # increase indexing register $t1
 	j       loop	       	# continues the loop
 
 strEnd:
@@ -47,7 +51,7 @@ strEnd:
 	li      $v0, 1	        # trap code, '1', refers to 'print_int' system call
 	syscall		            # execute the system call
 
-	la      $a0, endl	    # load $a0 with the address of the string, 'ans'
+	la      $a0, endl	    # load $a0 with the address of the string, 'endl'
 	li      $v0, 4	        # trap code, '4', refers to 'print_string' system call
 	syscall                 # execute the system call
 
