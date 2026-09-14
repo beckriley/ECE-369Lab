@@ -53,7 +53,7 @@ main:	addi	$sp, $sp, -4	# Make space on stack
 	li	$a0, 13		
 	jal	test		
 # What is the value of $v0 at this point?	(v0) = _ _ _ 34_ _ _ _ _       #
-# What does this code compute? Your answer HERE: _ _ _ _The sum of all elements within the first $a0 entries of an array that are greater than or equal to $a2.
+# What does this code compute? Your answer HERE: _The function recursively sums all array elements greater than or equal to the value stored in $a2, considering the first $a0 elements starting at the address in $a1.
 return:	
 li	$v0, 0		# Return value
 	lw	$ra, 0($sp)		# Restore return address
