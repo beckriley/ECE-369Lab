@@ -7,9 +7,9 @@
 #
 # Insert your answers below each question:-
 # 1(a) What is the address location of the first element of the array, X.
-#
+#      10010000
 # 1(b) What is the address location of the last element (element 7) of the array, X.
-#
+#      10010010
 # 2.   What are the values at location 'SUM' as the program executes?
 #    SUM is zero until loop ends then equals $s1 being 1
 # 3.   Traverse the program in single-step mode. Write down the intermediate 
