@@ -1,4 +1,6 @@
 # Exercise 3
+# Students: Beck Riley, Erick Figueroa, Earl Sangalang
+# Overall percent effort of each team member: 33%
 # Max Score: 12 points
 .data	
 list1:		.word		3, 9, -1, 0, 6, 5, -4, -7, -8,  
