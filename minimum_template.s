@@ -1,7 +1,8 @@
 # Exercise 3
 # Max Score: 12 points
 #
-# Students: 
+# Students: Beck Riley, Erick Figueroa, Earl Sangalang
+# Overall percent effort of each team member: 33%
 #
 # minimum.s 
 # Finds the index of the smallest element in an integer array
