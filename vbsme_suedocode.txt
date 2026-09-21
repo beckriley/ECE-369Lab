@@ -1,0 +1,127 @@
+FUNCTION vbsme(dimensions, frame, window)
+
+    frameBase = frame
+    windowBase = window
+    sizeInfo = dimensions
+
+    minSAD = largest positive integer
+
+    bestRow = 0
+    bestCol = 0
+
+    currentRow = 0
+    currentCol = -1
+
+    segment = 0
+
+
+    WHILE true
+
+        halfSegment = segment / 2
+
+        IF segment is even THEN
+            # Horizontal movement
+            segmentLength =
+                frameColumns
+                - windowColumns
+                + 1
+                - halfSegment
+
+        ELSE
+            # Vertical movement
+            segmentLength =
+                frameRows
+                - windowRows
+                - halfSegment
+        END IF
+
+
+        IF segmentLength <= 0 THEN
+            BREAK
+        END IF
+
+
+        WHILE segmentLength > 0
+
+            direction = segment MOD 4
+
+            IF direction == 0 THEN
+                currentCol = currentCol + 1       # move right
+
+            ELSE IF direction == 1 THEN
+                currentRow = currentRow + 1       # move down
+
+            ELSE IF direction == 2 THEN
+                currentCol = currentCol - 1       # move left
+
+            ELSE
+                currentRow = currentRow - 1       # move up
+            END IF
+
+
+            # Find address of frame[currentRow][currentCol]
+            framePointer = frameBase
+
+            REPEAT currentRow TIMES
+                framePointer =
+                    framePointer + frameColumns
+            END REPEAT
+
+            framePointer =
+                framePointer + currentCol
+
+
+            windowPointer = windowBase
+
+            SAD = 0
+
+
+            FOR windowRow = 0 TO windowRows - 1
+
+                FOR windowCol = 0 TO windowColumns - 1
+
+                    frameValue = value at framePointer
+                    windowValue = value at windowPointer
+
+                    difference = frameValue - windowValue
+
+                    IF difference < 0 THEN
+                        difference = -difference
+                    END IF
+
+                    SAD = SAD + difference
+
+                    framePointer = framePointer + 1
+                    windowPointer = windowPointer + 1
+
+                END FOR
+
+
+                # Skip unused part of the frame row
+                framePointer =
+                    framePointer
+                    + (frameColumns - windowColumns)
+
+            END FOR
+
+
+            IF SAD < minSAD THEN
+                minSAD = SAD
+                bestRow = currentRow
+                bestCol = currentCol
+            END IF
+
+
+            segmentLength = segmentLength - 1
+
+        END WHILE
+
+
+        segment = segment + 1
+
+    END WHILE
+
+
+    return bestRow, bestCol
+
+END FUNCTION
