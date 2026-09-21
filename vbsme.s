@@ -778,6 +778,127 @@ print_result:
 vbsme:  
     li      $v0, 0              # reset $v0 and $V1
     li      $v1, 0
-
+    
     # insert your code here
-   
+    addi $sp, $sp, -36
+    sw $ra, 0($sp)
+    sw $s0, 4($sp)
+    sw $s1, 8($sp)
+    sw $s2, 12($sp)
+    sw $s3, 16($sp)
+    sw $s4, 20($sp)
+    sw $s5, 24($sp)
+    sw $s6, 28($sp)
+    sw $s7, 32($sp)
+
+    move $s0, $a1
+    move $s1, $a2
+    lw $t1, 0($a0)
+    lw $s2, 4($a0)
+    lw $s3, 8($a0)
+    lw $s4, 12($a0)
+
+    sub $t1, $t1, $s3
+    sub $t3, $s2, $s4
+    li $t0, 0
+    li $t2, 0
+
+    li $s5, 0x7FFFFFFF
+    li $s6, 0
+    li $s7, 0
+
+spiral:
+    bgt $t2, $t3, done
+    bgt $t0, $t1, done
+
+    move $t4, $t2
+top_edge:
+    move $a0, $t0
+    move $a1, $t4
+    jal visit
+    addi $t4, $t4, 1
+    ble $t4, $t3, top_edge
+    addi $t0, $t0, 1
+    bgt $t0, $t1, done
+
+    move $t4, $t0
+right_edge:
+    move $a0, $t4
+    move $a1, $t3
+    jal visit
+    addi $t4, $t4 1
+    ble $t4, $t1, right_edge
+    addi $t3, $t3, -1
+    bgt $t2, $t3, done
+
+    move $t4, $t3
+bottom_edge:
+    move $a0, $t1
+    move $a1, $t4
+    jal visit
+    addi $t4, $t4, -1
+    bge $t4, $t2, bottom_edge
+    addi $t1, $t1, -1
+    bgt $t0, $t1, done
+
+    move $t4, $t1
+left_edge:
+    move $a0, $t4
+    move $a1, $t2
+    jal visit
+    addi $t4, $t4, -1
+    bge $t4, $t0, left_edge
+    addi $t2, $t2, 1
+
+    j spiral
+
+done:
+    move $v0, $s6
+    move $v1, $s7
+    lw $ra, 0($sp)
+    lw $s0, 4($sp)
+    lw $s1, 8($sp)
+    lw $s2, 12($sp)
+    lw $s3, 16($sp)
+    lw $s4, 20($sp)
+    lw $s5, 24($sp)
+    lw $s6, 28($sp)
+    lw $s7, 32($sp)
+    addi $sp, $sp, 36
+    jr $ra
+
+    
+visit:
+    mul $t5, $a0, $s2
+    add $t5, $t5, $a1
+    sll $t5, $t5, 2
+    add $t5, $t5, $s0
+    sll $t9, $s2, 2
+    move $a2, $s1
+    li $v0, 0
+    li $t6, 0
+v_row:
+    move $t7, $t5
+    li $t8, 0
+v_col:
+    lw $a3, 0($t7)
+    lw $v1, 0($a2)
+    sub $a3, $a3, $v1
+    bgez $a3, v_abs
+    sub $a3, $zero, $a3
+v_abs:
+    add $v0, $v0, $a3
+    addi $t7, $t7, 4
+    addi $a2, $a2, 4
+    addi $t8, $t8, 1
+    bne $t8, $s4, v_col
+    add $t5, $t5, $t9
+    addi $t6, $t6, 1
+    bne $t6, $s3, v_row
+
+    bge $v0, $s5, v_done
+    move $s5, $v0
+    move $s6, $a0
+    move $s7, $a1
+v_done:
+    jr $ra
