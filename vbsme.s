@@ -780,11 +780,11 @@ vbsme:
     li      $v1, 0
     
     # insert your code here
-    move $s0, $a1 #$s0 = address of first element of frame
+    move $s0, $a1 #$s0 = address of first element of frame 
     move $s1, $a2 #$s1 = address of first element of window
-    move $s2, $a0 #$s2 = address of aSize
+    move $s2, $a0 #$s2 = first address of aSize
     lui $s3, 0x7FFF
-    ori $s3, $s3, 0xFFFF
+    ori $s3, $s3, 0xFFFF #$s3 = a really high number so that SAD val 1 overwrites it
     li $s4, 0 #$s4 - $s6 = 0 / $t0 = 0 / $s7 = -1
     li $s5, 0
     li $s6, 0
@@ -792,32 +792,32 @@ vbsme:
     li $t0, 0
 
 segment:
-    srl $t7, $t0, 1
-    andi $t8, $t0, 1
-    bne $t8, $zero, vert_len
-    lw $t1, 4($s2)
-    lw $t4, 12($s2)
-    sub $t1, $t1, $t4
-    addi $t1, $t1, 1
-    sub $t1, $t1, $t7
+    srl $t7, $t0, 1 #$t7 = $t0 / 2
+    andi $t8, $t0, 1 #$t8 = $t0
+    bne $t8, $zero, vert_len #if $t8 is not 0, jump to vert_len
+    lw $t1, 4($s2) #$t1 = num columns of frame
+    lw $t4, 12($s2) #$t4 = num columns of window
+    sub $t1, $t1, $t4 #$t1 -= $t4 (columns of frame - columns of window)
+    addi $t1, $t1, 1 #$t1++ 
+    sub $t1, $t1, $t7 #$t1 -= $t7
     j len_done
 
 vert_len:
-    lw $t1, 0($s2)
-    lw $t4, 8($s2)
-    sub $t1, $t1, $t4
-    sub $t1, $t1, $t7
+    lw $t1, 0($s2) #$t1 = num rows of frame
+    lw $t4, 8($s2) #$t4 = nums rows of window
+    sub $t1, $t1, $t4 #$t1 -= $t4 (rows of frame - rows of window)
+    sub $t1, $t1, $t7 #$t1 -= $t7
 len_done:
-    blez $t1, done
+    blez $t1, done #if $t1 = 0, jump to done 
 
 step:
     andi $t7, $t0, 3
-    beq $t7, $zero, go_right
-    addi $t7, $t7, -1
-    beq $t7, $zero, go_down
-    addi $t7, $t7, -1
-    beq $t7, $zero, go_left
-    addi $s6, $s6, -1
+    beq $t7, $zero, go_right # if $t7 = 0, jump to go_right
+    addi $t7, $t7, -1 #$t7--
+    beq $t7, $zero, go_down # if $t7 = 0, jump to go_down
+    addi $t7, $t7, -1 #$t7--
+    beq $t7, $zero, go_left # if $t7 = 0, jump to go_left
+    addi $s6, $s6, -1 #$s6--
     j moved
 
 go_right:
@@ -832,21 +832,21 @@ go_left:
     addi $s7, $s7, -1
 
 moved:
-    move $t2, $s0
+    move $t2, $s0 #$t2 is the first element of the frame
     move $t4, $s6
-    beq $t4, $zero, add_col
+    beq $t4, $zero, add_col #if $t4 = 0, jump to add_col
 
 row_mul:
     lw $t7, 4($s2)
-    sll $t7, $t7, 2
-    add $t2, $t2, $t7
-    addi $t4, $t4, -1
-    bne $t4, $zero, row_mul
+    sll $t7, $t7, 2 #$t7 *= 2
+    add $t2, $t2, $t7 #$t2 += $t7
+    addi $t4, $t4, -1 #$t4--
+    bne $t4, $zero, row_mul # if $t4 is not zero, loop again
 
 add_col:
-    sll $t7, $s7, 2
-    add $t2, $t2, $t7
-    move $t3, $s1
+    sll $t7, $s7, 2 #$t7 *= 2
+    add $t2, $t2, $t7 #$t2 += $t7
+    move $t3, $s1 #$t3 becomes first element of window
     li $t6, 0
     li $t5, 0
 
@@ -855,10 +855,10 @@ blk_row:
 
 blk_col:
     lw $t7, 0($t2)
-    lw $t8, 0($t3)
-    sub $t7, $t7, $t8
-    bgez $t7, abs_done
-    sub $t7, $zero, $t7
+    lw $t8, 0($t3) 
+    sub $t7, $t7, $t8 #$t7 -= $t8 (element of frame - element of window)
+    bgez $t7, abs_done # Checks if $t7 is greater than or equal to zero, if it is, jump to abs_done
+    sub $t7, $zero, $t7 # gets the absolute if $t7 is negative
 
 abs_done:
     add $t6, $t6, $t7
@@ -889,6 +889,6 @@ no_update:
     j segment
 
 done:
-    move $v0, $s4
-    move $v1, $s5
-    jr $ra
+    move $v0, $s4 #return row index of window with minimum SAD
+    move $v1, $s5 #return column index of window with minimum SAD
+    jr $ra #return
