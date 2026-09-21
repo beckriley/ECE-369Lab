@@ -780,12 +780,12 @@ vbsme:
     li      $v1, 0
     
     # insert your code here
-    move $s0, $a1
-    move $s1, $a2
-    move $s2, $a0
+    move $s0, $a1 #$s0 = address of first element of frame
+    move $s1, $a2 #$s1 = address of first element of window
+    move $s2, $a0 #$s2 = address of aSize
     lui $s3, 0x7FFF
     ori $s3, $s3, 0xFFFF
-    li $s4, 0
+    li $s4, 0 #$s4 - $s6 = 0 / $t0 = 0 / $s7 = -1
     li $s5, 0
     li $s6, 0
     li $s7, -1
