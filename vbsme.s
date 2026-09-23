@@ -785,39 +785,39 @@ vbsme:
     move $s2, $a0 #$s2 = first address of aSize
     lui $s3, 0x7FFF
     ori $s3, $s3, 0xFFFF #$s3 = a really high number so that SAD val 1 overwrites it
-    li $s4, 0 #$s4 - $s6 = 0 / $t0 = 0 / $s7 = -1
-    li $s5, 0
-    li $s6, 0
-    li $s7, -1
-    li $t0, 0
+    li $s4, 0 #$s4 = best row
+    li $s5, 0 # s5 = best col
+    li $s6, 0 # s6 = r (current row)
+    li $s7, -1 # s7 = c (current col, first move makes it 0)
+    li $t0, 0 # t0 = segment number
 
 segment:
-    srl $t7, $t0, 1 #$t7 = $t0 / 2
-    andi $t8, $t0, 1 #$t8 = $t0
+    srl $t7, $t0, 1 #$t7 = $t0 / 2 (seg / 2)
+    andi $t8, $t0, 1 #$t8 = $t0 (0 = horizontal segment, 1 = vertical segment)
     bne $t8, $zero, vert_len #if $t8 is not 0, jump to vert_len
-    lw $t1, 4($s2) #$t1 = num columns of frame
-    lw $t4, 12($s2) #$t4 = num columns of window
+    lw $t1, 4($s2) #$t1 = num columns of frame (j)
+    lw $t4, 12($s2) #$t4 = num columns of window (l)
     sub $t1, $t1, $t4 #$t1 -= $t4 (columns of frame - columns of window)
-    addi $t1, $t1, 1 #$t1++ 
-    sub $t1, $t1, $t7 #$t1 -= $t7
+    addi $t1, $t1, 1 #$t1++  (Q = number of positions)
+    sub $t1, $t1, $t7 #$t1 -= $t7 (length = Q - m)
     j len_done
 
 vert_len:
-    lw $t1, 0($s2) #$t1 = num rows of frame
-    lw $t4, 8($s2) #$t4 = nums rows of window
-    sub $t1, $t1, $t4 #$t1 -= $t4 (rows of frame - rows of window)
-    sub $t1, $t1, $t7 #$t1 -= $t7
+    lw $t1, 0($s2) #$t1 = num rows of frame (i)
+    lw $t4, 8($s2) #$t4 = nums rows of window (k)
+    sub $t1, $t1, $t4 #$t1 -= $t4 (rows of frame - rows of window / P - 1)
+    sub $t1, $t1, $t7 #$t1 -= $t7 (length = P - 1 - m)
 len_done:
     blez $t1, done #if $t1 = 0, jump to done 
 
 step:
-    andi $t7, $t0, 3
+    andi $t7, $t0, 3 # direction = seg % 4
     beq $t7, $zero, go_right # if $t7 = 0, jump to go_right
     addi $t7, $t7, -1 #$t7--
     beq $t7, $zero, go_down # if $t7 = 0, jump to go_down
     addi $t7, $t7, -1 #$t7--
     beq $t7, $zero, go_left # if $t7 = 0, jump to go_left
-    addi $s6, $s6, -1 #$s6--
+    addi $s6, $s6, -1 #$s6-- (direction 3 = up)
     j moved
 
 go_right:
@@ -833,59 +833,59 @@ go_left:
 
 moved:
     move $t2, $s0 #$t2 is the first element of the frame
-    move $t4, $s6
+    move $t4, $s6 #t4 = r
     beq $t4, $zero, add_col #if $t4 = 0, jump to add_col
 
 row_mul:
-    lw $t7, 4($s2)
-    sll $t7, $t7, 2 #$t7 *= 2
-    add $t2, $t2, $t7 #$t2 += $t7
+    lw $t7, 4($s2) #j
+    sll $t7, $t7, 2 #$t7 *= 2 (j * 4 bytes)
+    add $t2, $t2, $t7 #$t2 += $t7 (move down one frame row)
     addi $t4, $t4, -1 #$t4--
     bne $t4, $zero, row_mul # if $t4 is not zero, loop again
 
 add_col:
-    sll $t7, $s7, 2 #$t7 *= 2
-    add $t2, $t2, $t7 #$t2 += $t7
+    sll $t7, $s7, 2 #$t7 *= 2 (c * 4 bytes)
+    add $t2, $t2, $t7 #$t2 += $t7 ($frame[r][c]
     move $t3, $s1 #$t3 becomes first element of window
-    li $t6, 0
-    li $t5, 0
+    li $t6, 0 #t6 = sum
+    li $t5, 0 #t5 = x (window row)
 
 blk_row:
-    li $t4, 0
+    li $t4, 0 #t4 = y (window col)
 
 blk_col:
-    lw $t7, 0($t2)
-    lw $t8, 0($t3) 
+    lw $t7, 0($t2) #frame pixel
+    lw $t8, 0($t3)  # window pixel
     sub $t7, $t7, $t8 #$t7 -= $t8 (element of frame - element of window)
     bgez $t7, abs_done # Checks if $t7 is greater than or equal to zero, if it is, jump to abs_done
     sub $t7, $zero, $t7 # gets the absolute if $t7 is negative
 
 abs_done:
-    add $t6, $t6, $t7
+    add $t6, $t6, $t7 #sum += |diff|
     addi $t2, $t2, 4
     addi $t3, $t3, 4
     addi $t4, $t4, 1
-    lw $t7, 12($s2)
+    lw $t7, 12($s2) #l
     bne $t4, $t7, blk_col
-    lw $t7, 4($s2)
-    lw $t8, 12($s2)
-    sub $t7, $t7, $t8
+    lw $t7, 4($s2) #j
+    lw $t8, 12($s2) #l
+    sub $t7, $t7, $t8 #j - l
     sll $t7, $t7, 2
-    add $t2, $t2, $t7
+    add $t2, $t2, $t7 #frame pointer to start of next block row
     addi $t5, $t5, 1
-    lw $t7, 8($s2)
+    lw $t7, 8($s2) #k
     bne $t5, $t7, blk_row
 
-    slt $t7, $t6, $s3
-    beq $t7, $zero, no_update
+    slt $t7, $t6, $s3 #is sum < best?
+    beq $t7, $zero, no_update #if not, jump to no_update
     move $s3, $t6
     move $s4, $s6
     move $s5, $s7
 
 no_update:
-    addi $t1, $t1, -1
+    addi $t1, $t1, -1 #one fewer step left in this segment
     bgtz $t1, step
-    addi $t0, $t0, 1
+    addi $t0, $t0, 1 #next segment (90 degree turn)
     j segment
 
 done:
