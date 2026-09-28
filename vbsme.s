@@ -1,6 +1,6 @@
 #  Fall 2026
-#  Team Members:    
-#  % Effort    :   
+#  Team Members: Erick Figueroa, 
+#  % Effort : 33% each
 #
 # ECE369A,  
 # 
