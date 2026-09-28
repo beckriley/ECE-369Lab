@@ -1,5 +1,5 @@
 #  Fall 2026
-#  Team Members: Erick Figueroa, Beck Riley,
+#  Team Members: Erick Figueroa, Beck Riley, Earl Sangalang
 #  % Effort : 33% each
 #
 # ECE369A,  
