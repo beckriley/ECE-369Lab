@@ -34,6 +34,34 @@ module DataMemory_tb();
 	initial begin
 	
     /* Please fill in the implementation here... */
+		//initialize inputs
+		Address = 32'd0;
+		WriteData = 32'd0;
+		MemWrite = 1'd0;
+		MemRead = 1'd0;
+
+		 #5;
+
+
+        ////////////////////////////////////////////////////////////////
+        // Test 1: MemRead = 0
+        // ReadData should be 0
+        ////////////////////////////////////////////////////////////////
+        Address  = 32'd0;
+        MemRead  = 1'b0;
+        MemWrite = 1'b0;
+
+        #1;
+
+        if (ReadData == 32'd0)
+            $display("Test 1 PASS: MemRead = 0 gives ReadData = 0");
+        else
+            $display("Test 1 FAIL: Expected 0, got %h", ReadData);
+
+
+
+		
+	
 	
 	end
 
