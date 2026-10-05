@@ -43,7 +43,27 @@ module RegisterFile_tb();
 	initial begin
 	
     /* Please fill in the implementation here... */
+	ReadRegister1 = 0;
+	ReadRegister2 = 0;
+	WriteRegister = 0;
+	WriteData = 0;
+	RegWrite = 0;
+
+	#50
 	
+    for (i = 8; i <= 25; i = i + 1) begin
+        @(negedge Clk);
+            WriteRegister = i;
+            WriteData = i;
+            RegWrite = 1;
+            @(posedge Clk);
+            #1;
+        end
+
+        @(negedge Clk);
+        RegWrite = 0;
+
+
 	end
 
 endmodule
