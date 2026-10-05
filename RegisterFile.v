@@ -60,7 +60,7 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	output reg [31:0] ReadData1;
 	output reg [31:0] ReadData2;
 
-	reg[31:0] register [0:31];
+	reg[31:0] registers [0:31];
 
 	integer i;
 
