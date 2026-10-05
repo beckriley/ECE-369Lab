@@ -63,7 +63,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData);
 	    if (MemRead)
 	        ReadData <= memory[Address[11:2]];
 	    else
-	        ReadData <= 32b'0;
+	        ReadData <= 32'b0;
     end
 
 
