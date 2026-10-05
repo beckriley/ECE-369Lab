@@ -60,10 +60,21 @@ module RegisterFile_tb();
             #1;
         end
 
+    @(negedge Clk);
+    RegWrite = 0;
+		
+    for (i = 8; i <= 25; i = i + 1) begin
+        @(posedge Clk);
+        ReadRegister1 = i;
+	    ReadRegister2 = i + 1;
         @(negedge Clk);
-        RegWrite = 0;
-
-
+        #1;
+	    $display(
+	    ReadRegister1, ReadData1, i + ReadRegister1,
+	    ReadRegister2, ReadData2, i + ReadRegister2);
+	    
+	    if (ReadData1 != i + ReadRegister1 || ReadData2 != i + ReadRegister2)
+	          $display("error");
 	end
 
 endmodule
