@@ -60,13 +60,13 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	output reg [31:0] ReadData1;
 	output reg [31:0] ReadData2;
 
-	reg[31:0] register [0:31];
+	reg [31:0] registers [0:31];
 
 	integer i;
 
 	initial begin
 		for (i = 0; i < 32; i = i +1)
-			registers[i] <= 32'b0;
+			registers[i] = 32'b0;
 	end
 
 	always @(posedge Clk) begin
