@@ -47,7 +47,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			4'b0101: ALUResult = A * B; // MUL
 			4'b0110: ALUResult = A - B; // SUB
 			4'b0111: ALUResult = ($signed(A) < $signed(B)) ? 32'd1 : 32'd0; // SLT
-			4'b1000: ALUResult = A // pass A for branches
+			4'b1000: ALUResult = A; // pass A for branches
 			4'b1001: ALUResult = B << A[4:0]; // SLL
 			4'b1010: ALUResult = B >> A[4:0]; // SRL
 			default: ALUResult = 32'd0;
