@@ -5,6 +5,11 @@
 // 
 // Module - ALU32Bit_tb.v
 // Description - Test the 'ALU32Bit.v' module.
+//
+// Tests:
+// AND, OR, ADD, XOR, NOR, MUL, SUB, SLT, PASS A, SLL, SRL
+//
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 module ALU32Bit_tb(); 
@@ -26,6 +31,12 @@ module ALU32Bit_tb();
 	initial begin
 	
     /* Please fill in the implementation here... */
+	
+
+
+
+
+		
 	
 	end
 
