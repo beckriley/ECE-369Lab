@@ -19,6 +19,7 @@ module RegisterFile_tb();
 	reg [31:0] WriteData;
 	reg RegWrite;
 	reg Clk;
+	integer i;
 
 	wire [31:0] ReadData1;
 	wire [31:0] ReadData2;
@@ -43,38 +44,41 @@ module RegisterFile_tb();
 	initial begin
 	
     /* Please fill in the implementation here... */
-	ReadRegister1 = 0;
-	ReadRegister2 = 0;
-	WriteRegister = 0;
-	WriteData = 0;
-	RegWrite = 0;
-
-	#50
+		ReadRegister1 = 0;
+		ReadRegister2 = 0;
+		WriteRegister = 0;
+		WriteData = 0;
+		RegWrite = 0;
 	
-    for (i = 8; i <= 25; i = i + 1) begin
-        @(negedge Clk);
-            WriteRegister = i;
-            WriteData = i;
-            RegWrite = 1;
-            @(posedge Clk);
-            #1;
-        end
-
-    @(negedge Clk);
-    RegWrite = 0;
+		#50;
 		
-    for (i = 8; i <= 25; i = i + 1) begin
-        @(posedge Clk);
-        ReadRegister1 = i;
-	    ReadRegister2 = i + 1;
-        @(negedge Clk);
-        #1;
-	    $display(
-	    ReadRegister1, ReadData1, i + ReadRegister1,
-	    ReadRegister2, ReadData2, i + ReadRegister2);
-	    
-	    if (ReadData1 != i + ReadRegister1 || ReadData2 != i + ReadRegister2)
-	          $display("error");
+	    for (i = 8; i <= 25; i = i + 1) begin
+	        @(negedge Clk);
+	        WriteRegister = i;
+	        WriteData = i;
+	        RegWrite = 1;
+	        @(posedge Clk);
+	        #1;
+	    end
+	
+	    @(negedge Clk);
+	    RegWrite = 0;
+			
+		for (i = 8; i <= 24; i = i + 2) begin
+	        @(posedge Clk);
+	        ReadRegister1 = i;
+		    ReadRegister2 = i + 1;
+	        @(negedge Clk);
+	        #1;
+			$display( "R[%0d]=%h  R[%0d]=%h",
+		    ReadRegister1, ReadData1,
+		    ReadRegister2, ReadData2);
+		    
+			if (ReadData1 !== ReadRegister1 || ReadData2 !== ReadRegister2)
+		          $display("error");
+		end
+		#20;
+		$finish;
 	end
 
 endmodule
