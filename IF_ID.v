@@ -29,3 +29,26 @@
  * Notes:
  *   - This must be a clocked pipeline register, not combinational wiring.
  */
+
+ module IF_ID (Clk, Reset, Instruction, PCValue, StoredInstruction, StoredPCValue);
+
+    input Clk;
+    input Reset;
+    input [31:0] Instruction;
+    input [31:0] PCValue;
+    output reg [31:0] StoredInstruction;
+    output reg [31:0] StoredPCValue;
+
+    always @(posedge Clk) begin
+        if (Reset) begin
+            StoredPCValue <= 32'b0;
+            StoredInstruction <= 32'b0;
+        end
+
+        else begin
+            StoredPCValue <= PCValue;
+            StoredInstruction <= Instruction;
+        end
+    end
+
+endmodule
