@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 /*beck
  * MEM_WB.v
  *
@@ -31,3 +32,30 @@
  * Reset behavior:
  *   - Clear all stored values and control signals when Reset is active.
  */
+
+module MEM_WB(
+  input Clock;
+  input [1:0] MemToReg_in;
+  input RegWrite_in;
+  input [31:0] PCPlus4_in;
+  input [31:0] ALUResult_in;
+  input [31:0] MemData_in;
+  input [4:0] DestReg_in;
+
+  output [1:0] MemToReg_out;
+  output RegWrite_out;
+  output [31:0] PCPlus4_out;
+  output [31:0] ALUResult_out;
+  output [31:0] MemData_out;
+  output [4:0] DestReg_out
+);
+
+  always @(posedge Clock) begin
+    MemToReg_out <= MemToReg_in;
+    RegWrite_out <= RegWrite_in;
+    PCPlus4_out <= PCPlus4_in;
+    ALUResult_out <= ALUResult_in;
+    MemData_out <= MemData_in;
+    DestReg_out <= DestReg_in;
+  end
+endmodule
