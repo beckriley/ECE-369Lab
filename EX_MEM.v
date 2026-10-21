@@ -54,23 +54,23 @@ module EX_MEM(
   input [31:0] WriteData_in,
   input [4:0] DestReg_in,
 
-  output MemRead_out,
-  output MemWrite_out,
-  output [1:0] MemSize_out,
-  output [2:0] BranchType_out,
-  output JumpReg_out,
-  output [1:0] MemToReg_out,
-  output RegWrite_out,
-  output [31:0] PCPlus4_out,
-  output [31:0] BranchTarget_out,
-  output [31:0] ALUResult_out,
-  output Zero_out,
-  output [31:0] WriteData_out,
-  output [4:0] DestReg_out
+  output reg MemRead_out,
+  output reg MemWrite_out,
+  output reg [1:0] MemSize_out,
+  output reg [2:0] BranchType_out,
+  output reg JumpReg_out,
+  output reg [1:0] MemToReg_out,
+  output reg RegWrite_out,
+  output reg [31:0] PCPlus4_out,
+  output reg [31:0] BranchTarget_out,
+  output reg [31:0] ALUResult_out,
+  output reg Zero_out,
+  output reg [31:0] WriteData_out,
+  output reg [4:0] DestReg_out
 );
 
   always @(posedge Clock) begin
-    if (Reset)
+    if (Reset) begin
       MemRead_out <= 0;
       MemWrite_out <= 0;
       MemSize_out <= 2'b0;
@@ -84,7 +84,7 @@ module EX_MEM(
       Zero_out <= 0;
       WriteData_out <= 32'b0;
       DestReg_out <= 5'b0;
-    else
+      end else begin
       MemRead_out <= MemRead_in;
       MemWrite_out <= MemWrite_in;
       MemSize_out <= MemSize_in;
@@ -98,6 +98,7 @@ module EX_MEM(
       Zero_out <= Zero_in;
       WriteData_out <= WriteData_in;
       DestReg_out <= DestReg_in;
+      end
   end
 endmodule
   
