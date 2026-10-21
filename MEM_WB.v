@@ -34,28 +34,38 @@
  */
 
 module MEM_WB(
-  input Clock;
-  input [1:0] MemToReg_in;
-  input RegWrite_in;
-  input [31:0] PCPlus4_in;
-  input [31:0] ALUResult_in;
-  input [31:0] MemData_in;
-  input [4:0] DestReg_in;
+  input Clock,
+  input Reset,
+  input [1:0] MemToReg_in,
+  input RegWrite_in,
+  input [31:0] PCPlus4_in,
+  input [31:0] ALUResult_in,
+  input [31:0] MemData_in,
+  input [4:0] DestReg_in,
 
-  output [1:0] MemToReg_out;
-  output RegWrite_out;
-  output [31:0] PCPlus4_out;
-  output [31:0] ALUResult_out;
-  output [31:0] MemData_out;
+  output [1:0] MemToReg_out,
+  output RegWrite_out,
+  output [31:0] PCPlus4_out,
+  output [31:0] ALUResult_out,
+  output [31:0] MemData_out,
   output [4:0] DestReg_out
 );
 
   always @(posedge Clock) begin
-    MemToReg_out <= MemToReg_in;
-    RegWrite_out <= RegWrite_in;
-    PCPlus4_out <= PCPlus4_in;
-    ALUResult_out <= ALUResult_in;
-    MemData_out <= MemData_in;
-    DestReg_out <= DestReg_in;
+    if (Reset) begin
+      MemToReg_out <= 2'b0;
+      RegWrite_out <= 1'b0;
+      PCPlus4_out <= 32'b0;
+      ALUResult_out <= 32'b0;
+      MemData_out <= 32'b0;
+      DestReg_out <= 5'b0;
+    end else begin
+      MemToReg_out <= MemToReg_in;
+      RegWrite_out <= RegWrite_in;
+      PCPlus4_out <= PCPlus4_in;
+      ALUResult_out <= ALUResult_in;
+      MemData_out <= MemData_in;
+      DestReg_out <= DestReg_in;
+    end
   end
 endmodule
