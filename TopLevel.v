@@ -141,7 +141,17 @@ module Top(Clk, Reset, PCResult, WriteData);
 
   wire [4:0] DestReg_EX = (RegDst_EX == 2'b00) ? Rt_EX : (RegDst_EX == 2'b01) ? Rd_EX : 5'd31;
 
-  //EX_MEM (WIP)
+  //EX_MEM
+  wire MemRead_MEM, MemWrite_MEM, JumpReg_MEM, RegWrite_MEM, Zero_MEM;
+  wire [1:0] MemSize_MEM, MemtoReg_MEM;
+  wire [2:0] BranchType_MEM;
+  wire [31:0] PCPlus4_MEM, BranchTarget_MEM, ALUResult_MEM, WriteData_MEM;
+  wire [4:0] DestReg_MEM;
+
+  EX_MEM exmem(.Clock(Clk), .Reset(Reset), .MemRead_in(MemRead_EX), .MemWrite_in(MemWrite_EX), .MemSize_in(MemSize_EX), .BranchType_in(BranchType_EX), .JumpReg_in(JumpReg_EX), .MemToReg_in(MemtoReg_EX), .RegWrite_in(RegWrite_EX), .PCPlus4_in(PCPlus4_EX), .BranchTarget_in(BranchTarget_EX),
+               .ALUResult_in(ALUResult_EX), .Zero_in(Zero_EX), .WriteData_in(WriteData_EX), .DestReg_in(DestReg_EX), .MemRead_out(MemRead_MEM), .MemWrite_out(MemWrite_MEM), .MemSize_out(MemSize_MEM), .BranchType_out(BranchType_MEM), .JumpReg_out(JumpReg_MEM),
+               .MemToReg_out(MemtoReg_MEM), .RegWrite_out(MemtoReg_MEM), .PCPlus4_out(PCPlus4_MEM), .BranchTarget_out(BranchTarget_MEM), .ALUResult_out(ALUResult_MEM), .Zero_out(Zero_MEM), .WriteData_out(WriteData_MEM), .DestReg_out(DestReg_MEM));
+  
   //MEM    (WIP)
   //MEM_WB  (WIP)
   //WB      (WIP)
