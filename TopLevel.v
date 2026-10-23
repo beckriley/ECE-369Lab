@@ -87,10 +87,10 @@ module Top(Clk, Reset, PCResult, WriteData);
   IF_ID ifid(.Clk(Clk), .Reset(Reset), .Instruction(Instruction_IF), .PCValue(PCPlus4_IF), .StoredInstruction(Instruction_ID), .StoredPCValue(PCPlus4_ID));
 
   //ID
-  wire [4:0] Rs_ID = Instruction[25:21];
-  wire [4:0] Rt_ID = Instruction[20:16];
-  wire [4:0] Rd_ID = Instruction[15:11];
-  wire [4:0] Shamt_ID = Instruction[10:6];
+  wire [4:0] Rs_ID = Instruction_ID[25:21];
+  wire [4:0] Rt_ID = Instruction_ID[20:16];
+  wire [4:0] Rd_ID = Instruction_ID[15:11];
+  wire [4:0] Shamt_ID = Instruction_ID[10:6];
 
   wire [1:0] RegDst_ID, MemSize_ID, MemtoReg_ID;
   wire ALUSrcA_ID, ALUSrcB_ID, ExtOp_ID, MemRead_ID, MemWrite_ID, RegWrite_ID;
@@ -110,7 +110,7 @@ module Top(Clk, Reset, PCResult, WriteData);
   wire [4:0] DestReg_WB;
   wire [31:0] WB_Data;
 
-  RegisterFile rf(.ReadRegister(Rs_ID), .ReadRegister2(Rt_ID), .WriteRegister(DestReg_WB), .WriteData(WB_Data), .RegWrite(RegWrite_WB), .Clk(Clk), .ReadData1(RegData1_ID), .ReadData2(RegData2_ID));
+  RegisterFile rf(.ReadRegister1(Rs_ID), .ReadRegister2(Rt_ID), .WriteRegister(DestReg_WB), .WriteData(WB_Data), .RegWrite(RegWrite_WB), .Clk(Clk), .ReadData1(RegData1_ID), .ReadData2(RegData2_ID));
 
   //ID_EX
   wire [1:0] RegDst_EX, MemSize_EX, MemtoReg_EX, Jump_EX;
@@ -137,7 +137,7 @@ module Top(Clk, Reset, PCResult, WriteData);
 
   ALU32Bit alu(.ALUControl(ALUControl_final), .A(ALU_A), .B(ALU_B), .ALUResult(ALUResult_EX), .Zero(Zero_EX));
 
-  wire [31:0] BranchTarget_EX = PCPlus4_Ex + (Imm_EX << 2);
+  wire [31:0] BranchTarget_EX = PCPlus4_EX + (Imm_EX << 2);
 
   wire [4:0] DestReg_EX = (RegDst_EX == 2'b00) ? Rt_EX : (RegDst_EX == 2'b01) ? Rd_EX : 5'd31;
 
@@ -149,10 +149,35 @@ module Top(Clk, Reset, PCResult, WriteData);
   wire [4:0] DestReg_MEM;
 
   EX_MEM exmem(.Clock(Clk), .Reset(Reset), .MemRead_in(MemRead_EX), .MemWrite_in(MemWrite_EX), .MemSize_in(MemSize_EX), .BranchType_in(BranchType_EX), .JumpReg_in(JumpReg_EX), .MemToReg_in(MemtoReg_EX), .RegWrite_in(RegWrite_EX), .PCPlus4_in(PCPlus4_EX), .BranchTarget_in(BranchTarget_EX),
-               .ALUResult_in(ALUResult_EX), .Zero_in(Zero_EX), .WriteData_in(WriteData_EX), .DestReg_in(DestReg_EX), .MemRead_out(MemRead_MEM), .MemWrite_out(MemWrite_MEM), .MemSize_out(MemSize_MEM), .BranchType_out(BranchType_MEM), .JumpReg_out(JumpReg_MEM),
-               .MemToReg_out(MemtoReg_MEM), .RegWrite_out(MemtoReg_MEM), .PCPlus4_out(PCPlus4_MEM), .BranchTarget_out(BranchTarget_MEM), .ALUResult_out(ALUResult_MEM), .Zero_out(Zero_MEM), .WriteData_out(WriteData_MEM), .DestReg_out(DestReg_MEM));
+               .ALUResult_in(ALUResult_EX), .Zero_in(Zero_EX), .WriteData_in(RegData2_EX), .DestReg_in(DestReg_EX), .MemRead_out(MemRead_MEM), .MemWrite_out(MemWrite_MEM), .MemSize_out(MemSize_MEM), .BranchType_out(BranchType_MEM), .JumpReg_out(JumpReg_MEM),
+               .MemToReg_out(MemtoReg_MEM), .RegWrite_out(RegWrite_MEM), .PCPlus4_out(PCPlus4_MEM), .BranchTarget_out(BranchTarget_MEM), .ALUResult_out(ALUResult_MEM), .Zero_out(Zero_MEM), .WriteData_out(WriteData_MEM), .DestReg_out(DestReg_MEM));
   
-  //MEM    (WIP)
-  //MEM_WB  (WIP)
-  //WB      (WIP)
+  //MEM
+  wire BranchTaken, TargetSel;
+
+  BranchUnit bu(.BranchType(BranchType_MEM), .JumpReg(JumpReg_MEM), .Zero(Zero_MEM), .Sign(ALUResult_MEM[31]), .BranchTaken(BranchTaken), .MemRedirect(MemRedirect), .TargetSel(TargetSel));
+
+  Mux32Bit2To1 mux_target(.out(MemTarget), .inA(BranchTarget_MEM), .inB(ALUResult_MEM), .sel(TargetSel));
+
+  wire [31:0] MemData_MEM;
+
+  DataMemory dm(.Address(ALUResult_MEM), .WriteData(WriteData_MEM), .Clk(Clk), .MemWrite(MemWrite_MEM), .MemRead(MemRead_MEM), .ReadData(MemData_MEM));
+  
+  //MEM_WB
+  wire [1:0] MemtoReg_WB;
+  wire [31:0] PCPlus4_WB, ALUResult_WB, MemData_WB;
+
+  MEM_WB memwb(.Clock(Clk), .Reset(Reset), .MemToReg_in(MemtoReg_MEM), .RegWrite_in(RegWrite_MEM), .PCPlus4_in(PCPlus4_MEM), .ALUResult_in(ALUResult_MEM), .MemData_in(MemData_MEM), .DestReg_in(DestReg_MEM), .MemToReg_out(MemtoReg_WB), .RegWrite_out(RegWrite_WB),
+               .PCPlus4_out(PCPlus4_WB), .ALUResult_out(ALUResult_WB), .MemData_out(MemData_WB), .DestReg_out(DestReg_WB));
+  
+  //WB
+  wire [31:0] WB_ALUorMem;
+
+  Mux32Bit2To1 mux_wb0(.out(WB_ALUorMem), .inA(ALUResult_WB), .inB(MemData_WB), .sel(MemtoReg_WB[0]));
+  Mux32Bit2To1 mux_wb1(.out(WB_Data), .inA(WB_ALUorMem), .inB(PCPlus4_WB), .sel(MemtoReg_WB[1]));
+
+  assign PCResult = PC;
+  assign WriteData = WB_Data;
+
+endmodule
   
