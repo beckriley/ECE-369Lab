@@ -7,20 +7,20 @@
 // Description - Performs signal multiplexing between 2 32-Bit words.
 ////////////////////////////////////////////////////////////////////////////////
 
-module Mux32Bit2To1(out, inA, inB, sel);
-
-    output reg [31:0] out;
-    
-    input [31:0] inA;
-    input [31:0] inB;
-    input sel;
-
-    /* Fill in the implementation here ... */ 
+module Mux32bit3to1(
+    input  [31:0] in0,
+    input  [31:0] in1,
+    input  [31:0] in2,
+    input  [1:0]  sel,
+    output reg [31:0] out
+);
     always @(*) begin
-        if (sel == 1'b0)
-            out <= inA;
-        else
-            out <= inB;
+        case (sel)
+            2'b00:   out = in0;
+            2'b01:   out = in1;
+            2'b10:   out = in2;
+            default: out = in0;
+        endcase
     end
-
 endmodule
+
