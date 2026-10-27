@@ -35,36 +35,78 @@
 // of the "Address" input to index any of the 256 words. 
 ////////////////////////////////////////////////////////////////////////////////
 
-module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData); 
-
-    input [31:0] Address; 	// Input Address 
-    input [31:0] WriteData; // Data that needs to be written into the address 
-    input Clk;
-    input MemWrite; 		// Control signal for memory write 
-    input MemRead; 			// Control signal for memory read 
-
-    output reg[31:0] ReadData; // Contents of memory location at Address
-
-    /* Please fill in the implementation here */
-    reg [31:0] memory[0:1023];
+module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, MemSize, ReadData);
+ 
+    input  [31:0] Address;
+    input  [31:0] WriteData;
+    input         Clk;
+    input         MemWrite;
+    input         MemRead;
+    input  [1:0]  MemSize;
+ 
+    output reg [31:0] ReadData;
+ 
+    reg [31:0] memory [0:1023];
     integer i;
-    
+ 
     initial begin
         for (i = 0; i < 1024; i = i + 1)
-	        memory[i] = 32'b0;
+            memory[i] = 32'b0;
+        $readmemh("data_memory.mem", memory);
     end
-    
+ 
+    wire [9:0]  Index = Address[11:2];
+    wire [31:0] Word  = memory[Index];
+ 
+    // ---------------- store: merge the new byte / half into the old word ----------------
+    reg [31:0] NewWord;
+ 
+    always @(*) begin
+        NewWord = Word;
+        case (MemSize)
+            2'b00: begin      
+                case (Address[1:0])
+                    2'b00:   NewWord[7:0]   = WriteData[7:0];
+                    2'b01:   NewWord[15:8]  = WriteData[7:0];
+                    2'b10:   NewWord[23:16] = WriteData[7:0];
+                    default: NewWord[31:24] = WriteData[7:0];
+                endcase
+            end
+            2'b01: begin 
+                if (Address[1]) NewWord[31:16] = WriteData[15:0];
+                else            NewWord[15:0]  = WriteData[15:0];
+            end
+            default: NewWord = WriteData;
+        endcase
+    end
+ 
     always @(posedge Clk) begin
         if (MemWrite)
-	        memory[Address[11:2]] <= WriteData;
+            memory[Index] <= NewWord;
     end
-
+ 
+    // ---------------- load: pick the byte / half and sign-extend ----------------
+    reg [7:0]  LoadByte;
+    reg [15:0] LoadHalf;
+ 
     always @(*) begin
-	    if (MemRead)
-	        ReadData <= memory[Address[11:2]];
-	    else
-	        ReadData <= 32'b0;
+        case (Address[1:0])
+            2'b00:   LoadByte = Word[7:0];
+            2'b01:   LoadByte = Word[15:8];
+            2'b10:   LoadByte = Word[23:16];
+            default: LoadByte = Word[31:24];
+        endcase
+        LoadHalf = Address[1] ? Word[31:16] : Word[15:0];
+ 
+        if (MemRead) begin
+            case (MemSize)
+                2'b00:   ReadData = {{24{LoadByte[7]}}, LoadByte};
+                2'b01:   ReadData = {{16{LoadHalf[15]}}, LoadHalf};
+                default: ReadData = Word;      
+            endcase
+        end else begin
+            ReadData = 32'b0;
+        end
     end
-
-
+ 
 endmodule
