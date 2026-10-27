@@ -42,15 +42,15 @@ module MEM_WB(
   input [31:0] ALUResult_in,
   input [31:0] MemData_in,
   input [4:0] DestReg_in,
-
-  output [1:0] MemToReg_out,
-  output RegWrite_out,
-  output [31:0] PCPlus4_out,
-  output [31:0] ALUResult_out,
-  output [31:0] MemData_out,
-  output [4:0] DestReg_out
+ 
+  output reg [1:0] MemToReg_out,
+  output reg RegWrite_out,
+  output reg [31:0] PCPlus4_out,
+  output reg [31:0] ALUResult_out,
+  output reg [31:0] MemData_out,
+  output reg [4:0] DestReg_out
 );
-
+ 
   always @(posedge Clock) begin
     if (Reset) begin
       MemToReg_out <= 2'b0;
