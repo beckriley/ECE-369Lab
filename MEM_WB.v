@@ -51,7 +51,7 @@ module MEM_WB(
   output reg [4:0] DestReg_out
 );
  
-  always @(posedge Clock) begin
+  always @(posedge Clock or posedge Reset) begin
     if (Reset) begin
       MemToReg_out <= 2'b0;
       RegWrite_out <= 1'b0;
