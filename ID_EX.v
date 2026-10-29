@@ -91,7 +91,7 @@ module ID_EX(Clk, Reset, RegisterData1, RegisterData2, Imm, PCValue, rt, rd, rs,
     output reg [2:0] BranchType_out;
     output reg [1:0] Jump_out;
 
-    always @(posedge Clk) begin
+  always @(posedge Clk or posedge Reset) begin
         if (Reset) begin
             PCValue_out <= 32'b0;
             ReadData1 <= 32'b0;
