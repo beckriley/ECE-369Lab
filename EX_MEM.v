@@ -69,7 +69,7 @@ module EX_MEM(
   output reg [4:0] DestReg_out
 );
  
-  always @(posedge Clock) begin
+  always @(posedge Clock or posedge Reset) begin
     if (Reset) begin
       MemRead_out <= 1'b0;
       MemWrite_out <= 1'b0;
