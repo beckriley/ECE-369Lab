@@ -41,7 +41,7 @@
     output reg [31:0] StoredInstruction;
     output reg [31:0] StoredPCValue;
 
-    always @(posedge Clk) begin
+  always @(posedge Clk or posedge Reset) begin
         if (Reset) begin
             StoredPCValue <= 32'b0;
             StoredInstruction <= 32'b0;
