@@ -1,4 +1,4 @@
-/*
+/* Names: Erick Figueroa, Beck Riley, 
  * LAB 6 Percent Effort: 33% each
  *
  *
