@@ -9,6 +9,16 @@ module Top(Clk, Reset, PCResult, WriteData);
 
     localparam [3:0] ALU_PASSA = 4'b1000;
 
+    // =================== LAB 6: Hazard control ===================
+    wire PCWrite, IF_ID_Write, InsertBubble;
+    wire PCEnable, Flush_IFID, Flush_IDEX;
+    // Branch/jr redirect from MEM beats a stall on a younger instruction.
+    assign PCEnable = PCWrite | MemRedirect;
+    // After direct j/jal in ID, discard the sequentially fetched instruction.
+    // After a taken branch/jr in MEM, discard all younger instructions.
+    assign Flush_IFID = MemRedirect | JumpID;
+    assign Flush_IDEX = MemRedirect | InsertBubble;
+
     // =========================== IF ===========================
     wire [31:0] PC, PCNext, PCAfterJump;
     wire [31:0] PCPlus4_IF = PC + 32'd4;
@@ -21,7 +31,8 @@ module Top(Clk, Reset, PCResult, WriteData);
     Mux32Bit2To1 mux_pc_jump(.out(PCAfterJump), .inA(PCPlus4_IF), .inB(JumpTarget_ID), .sel(JumpID));
     Mux32Bit2To1 mux_pc_redirect(.out(PCNext), .inA(PCAfterJump), .inB(MemTarget), .sel(MemRedirect));
 
-    ProgramCounter pc_reg(.Address(PCNext), .PCResult(PC), .Reset(Reset), .Clk(Clk));
+    ProgramCounter pc_reg(.Address(PCNext), .PCResult(PC), .Reset(Reset),
+                          .Clk(Clk), .PCWrite(PCEnable));
 
     InstructionMemory im(.Address(PC), .Instruction(Instruction_IF));
 
@@ -30,6 +41,7 @@ module Top(Clk, Reset, PCResult, WriteData);
 
     IF_ID ifid(.Clk(Clk), .Reset(Reset),
                .Instruction(Instruction_IF), .PCValue(PCPlus4_IF),
+               .WriteEnable(IF_ID_Write), .Flush(Flush_IFID),
                .StoredInstruction(Instruction_ID), .StoredPCValue(PCPlus4_ID));
 
     // =========================== ID ===========================
@@ -56,6 +68,17 @@ module Top(Clk, Reset, PCResult, WriteData);
 
     assign JumpTarget_ID = {PCPlus4_ID[31:28], Instruction_ID[25:0], 2'b00};
 
+    // HazardDetection is combinational; it compares the ID instruction
+    // with pending destination registers in EX, MEM, and WB. No forwarding.
+    HazardDetection hazard (
+        .Instruction_ID(Instruction_ID),
+        .DestReg_EX(DestReg_EX),   .RegWrite_EX(RegWrite_EX),
+        .DestReg_MEM(DestReg_MEM), .RegWrite_MEM(RegWrite_MEM),
+        .DestReg_WB(DestReg_WB),   .RegWrite_WB(RegWrite_WB),
+        .PCWrite(PCWrite), .IF_ID_Write(IF_ID_Write),
+        .InsertBubble(InsertBubble)
+    );
+
     wire [31:0] RegData1_ID, RegData2_ID;
     wire        RegWrite_WB;
     wire [4:0]  DestReg_WB;
@@ -65,6 +88,9 @@ module Top(Clk, Reset, PCResult, WriteData);
                     .WriteRegister(DestReg_WB), .WriteData(WB_Data), .RegWrite(RegWrite_WB),
                     .Clk(Clk), .ReadData1(RegData1_ID), .ReadData2(RegData2_ID));
 
+    // All-zero instruction is an architectural NOP, not a register write.
+    wire RegWrite_ID_Valid = RegWrite_ID && (Instruction_ID != 32'b0);
+
     // ----------------------- ID/EX -----------------------
     wire [1:0]  RegDst_EX, MemSize_EX, MemtoReg_EX, Jump_EX;
     wire        ALUSrcA_EX, ALUSrcB_EX, MemRead_EX, MemWrite_EX, RegWrite_EX;
@@ -73,12 +99,12 @@ module Top(Clk, Reset, PCResult, WriteData);
     wire [31:0] PCPlus4_EX, RegData1_EX, RegData2_EX, Imm_EX;
     wire [4:0]  Rs_EX, Rt_EX, Rd_EX, Shamt_EX;
 
-    ID_EX idex(.Clk(Clk), .Reset(Reset),
+    ID_EX idex(.Clk(Clk), .Reset(Reset), .Flush(Flush_IDEX),
         .RegisterData1(RegData1_ID), .RegisterData2(RegData2_ID), .Imm(Imm_ID), .PCValue(PCPlus4_ID),
         .rt(Rt_ID), .rd(Rd_ID), .rs(Rs_ID), .Shamt(Shamt_ID),
         .RegDst(RegDst_ID), .ALUSrcA(ALUSrcA_ID), .ALUSrcB(ALUSrcB_ID), .ALUControl(ALUControl_ID),
         .MemRead(MemRead_ID), .MemWrite(MemWrite_ID), .MemSize(MemSize_ID),
-        .MemtoReg(MemtoReg_ID), .RegWrite(RegWrite_ID), .BranchType(BranchType_ID), .Jump(Jump_ID),
+        .MemtoReg(MemtoReg_ID), .RegWrite(RegWrite_ID_Valid), .BranchType(BranchType_ID), .Jump(Jump_ID),
         .ReadData1(RegData1_EX), .ReadData2(RegData2_EX), .Imm_out(Imm_EX), .PCValue_out(PCPlus4_EX),
         .rt_out(Rt_EX), .rd_out(Rd_EX), .rs_out(Rs_EX), .Shamt_out(Shamt_EX),
         .RegDst_out(RegDst_EX), .ALUSrcA_out(ALUSrcA_EX), .ALUSrcB_out(ALUSrcB_EX), .ALUControl_out(ALUControl_EX),
@@ -111,7 +137,7 @@ module Top(Clk, Reset, PCResult, WriteData);
     wire [31:0] PCPlus4_MEM, BranchTarget_MEM, ALUResult_MEM, WriteData_MEM;
     wire [4:0]  DestReg_MEM;
 
-    EX_MEM exmem(.Clock(Clk), .Reset(Reset),
+    EX_MEM exmem(.Clock(Clk), .Reset(Reset), .Flush(MemRedirect),
         .MemRead_in(MemRead_EX), .MemWrite_in(MemWrite_EX), .MemSize_in(MemSize_EX),
         .BranchType_in(BranchType_EX), .JumpReg_in(JumpReg_EX),
         .MemToReg_in(MemtoReg_EX), .RegWrite_in(RegWrite_EX),
@@ -151,7 +177,8 @@ module Top(Clk, Reset, PCResult, WriteData);
     // =========================== WB ===========================
     wire [31:0] WB_ALUorMem;
     Mux32Bit2To1 mux_wb0(.out(WB_ALUorMem), .inA(ALUResult_WB), .inB(MemData_WB), .sel(MemtoReg_WB[0]));
-    Mux32Bit2To1 mux_wb1(.out(WB_Data),     .inA(WB_ALUorMem),  .inB(PCPlus4_WB + 32'd4), .sel(MemtoReg_WB[1]));
+    // No branch-delay slot: jal writes instruction-PC + 4 to $ra.
+    Mux32Bit2To1 mux_wb1(.out(WB_Data),     .inA(WB_ALUorMem),  .inB(PCPlus4_WB), .sel(MemtoReg_WB[1]));
   
     assign PCResult  = (PCPlus4_WB == 32'd0) ? 32'd0 : (PCPlus4_WB - 32'd4);
     assign WriteData = RegWrite_WB ? WB_Data : 32'd0;
