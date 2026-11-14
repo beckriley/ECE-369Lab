@@ -24,7 +24,7 @@
 // location, 0x00000000H).
 ////////////////////////////////////////////////////////////////////////////////
 
-module ProgramCounter(Address, PCResult, Reset, Clk. PCWrite);
+module ProgramCounter(Address, PCResult, Reset, Clk, PCWrite);
 
 	input [31:0] Address;
 	input Reset, Clk;
