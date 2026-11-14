@@ -45,8 +45,9 @@ module ID_EX(Clk, Reset, RegisterData1, RegisterData2, Imm, PCValue, rt, rd, rs,
              MemtoReg, RegWrite, BranchType, Jump,
              ReadData1, ReadData2, Imm_out, PCValue_out, rt_out, rd_out, rs_out, Shamt_out,
              RegDst_out, ALUSrcA_out, ALUSrcB_out, ALUControl_out, MemRead_out, MemWrite_out,
-             MemSize_out, MemtoReg_out, RegWrite_out, BranchType_out, Jump_out);
+             MemSize_out, MemtoReg_out, RegWrite_out, BranchType_out, Jump_out, Flush);
 
+    input Flush;
     input Clk;
     input Reset;
     input [31:0] RegisterData1;
@@ -114,6 +115,28 @@ module ID_EX(Clk, Reset, RegisterData1, RegisterData2, Imm, PCValue, rt, rd, rs,
             MemtoReg_out <= 2'b0;
         end
 
+        else if (Flush) begin
+            PCValue_out    <= 32'b0;
+            ReadData1      <= 32'b0;
+            ReadData2      <= 32'b0;
+            Imm_out        <= 32'b0;
+            rs_out         <= 5'b0;
+            rt_out         <= 5'b0;
+            rd_out         <= 5'b0;
+            Shamt_out      <= 5'b0;
+            ALUControl_out <= 4'b0;
+            ALUSrcA_out    <= 1'b0;
+            ALUSrcB_out    <= 1'b0;
+            RegDst_out     <= 2'b0;
+            BranchType_out <= 3'b0;
+            Jump_out       <= 2'b0;
+            MemRead_out    <= 1'b0;
+            MemWrite_out   <= 1'b0;
+            MemSize_out    <= 2'b0;
+            RegWrite_out   <= 1'b0;
+            MemtoReg_out   <= 2'b0;
+        end
+    
         else begin
             PCValue_out <= PCValue;
             ReadData1 <= RegisterData1;
