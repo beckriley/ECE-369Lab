@@ -53,7 +53,7 @@ module EX_MEM(
   input Zero_in,
   input [31:0] WriteData_in,
   input [4:0] DestReg_in,
-  input Flush;
+  input Flush,
  
   output reg MemRead_out,
   output reg MemWrite_out,
