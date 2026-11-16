@@ -9,6 +9,12 @@ module Top(Clk, Reset, PCResult, WriteData);
 
     localparam [3:0] ALU_PASSA = 4'b1000;
 
+    wire MemRedirect;
+    wire [1:0] Jump_ID;
+    wire JumpID = (Jump_ID == 2'b01);
+    wire RegWrite_EX, RegWrite_MEM, RegWrite_WB;
+    wire [4:0] DestReg_EX, DestReg_MEM, DestReg_WB;
+
     // =================== LAB 6: Hazard control ===================
     wire PCWrite, IF_ID_Write, InsertBubble;
     wire PCEnable, Flush_IFID, Flush_IDEX;
