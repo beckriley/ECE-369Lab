@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 /* Names: Erick Figueroa, Beck Riley, Earl Sangalang
  * LAB 6 Percent Effort: 33% each
  *
