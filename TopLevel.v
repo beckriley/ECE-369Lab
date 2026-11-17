@@ -30,9 +30,6 @@ module Top(Clk, Reset, PCResult, WriteData);
     wire [31:0] PCPlus4_IF = PC + 32'd4;
     wire [31:0] Instruction_IF;
     wire [31:0] JumpTarget_ID, MemTarget;
-    wire        MemRedirect;
-    wire [1:0]  Jump_ID;
-    wire        JumpID = (Jump_ID == 2'b01);
 
     Mux32Bit2To1 mux_pc_jump(.out(PCAfterJump), .inA(PCPlus4_IF), .inB(JumpTarget_ID), .sel(JumpID));
     Mux32Bit2To1 mux_pc_redirect(.out(PCNext), .inA(PCAfterJump), .inB(MemTarget), .sel(MemRedirect));
@@ -86,8 +83,6 @@ module Top(Clk, Reset, PCResult, WriteData);
     );
 
     wire [31:0] RegData1_ID, RegData2_ID;
-    wire        RegWrite_WB;
-    wire [4:0]  DestReg_WB;
     wire [31:0] WB_Data;
 
     RegisterFile rf(.ReadRegister1(Rs_ID), .ReadRegister2(Rt_ID),
@@ -99,7 +94,7 @@ module Top(Clk, Reset, PCResult, WriteData);
 
     // ----------------------- ID/EX -----------------------
     wire [1:0]  RegDst_EX, MemSize_EX, MemtoReg_EX, Jump_EX;
-    wire        ALUSrcA_EX, ALUSrcB_EX, MemRead_EX, MemWrite_EX, RegWrite_EX;
+    wire        ALUSrcA_EX, ALUSrcB_EX, MemRead_EX, MemWrite_EX;
     wire [3:0]  ALUControl_EX;
     wire [2:0]  BranchType_EX;
     wire [31:0] PCPlus4_EX, RegData1_EX, RegData2_EX, Imm_EX;
@@ -133,15 +128,12 @@ module Top(Clk, Reset, PCResult, WriteData);
 
     wire [31:0] BranchTarget_EX = PCPlus4_EX + (Imm_EX << 2);
 
-    wire [4:0] DestReg_EX = (RegDst_EX == 2'b00) ? Rt_EX :
-                            (RegDst_EX == 2'b01) ? Rd_EX : 5'd31;
-
+    assign DestReg_EX = (RegDst_EX == 2'b00) ? Rt_EX : (RegDst_EX == 2'b01) ? Rd_EX : 5'd31;
     // ----------------------- EX/MEM -----------------------
-    wire        MemRead_MEM, MemWrite_MEM, JumpReg_MEM, RegWrite_MEM, Zero_MEM;
+    wire        MemRead_MEM, MemWrite_MEM, JumpReg_MEM, Zero_MEM;
     wire [1:0]  MemSize_MEM, MemtoReg_MEM;
     wire [2:0]  BranchType_MEM;
     wire [31:0] PCPlus4_MEM, BranchTarget_MEM, ALUResult_MEM, WriteData_MEM;
-    wire [4:0]  DestReg_MEM;
 
     EX_MEM exmem(.Clock(Clk), .Reset(Reset), .Flush(MemRedirect),
         .MemRead_in(MemRead_EX), .MemWrite_in(MemWrite_EX), .MemSize_in(MemSize_EX),
