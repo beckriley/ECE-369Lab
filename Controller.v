@@ -71,6 +71,7 @@ module Controller(
   localparam OP_ANDI = 6'b001100;
   localparam OP_ORI = 6'b001101;
   localparam OP_XORI = 6'b001110;
+  localparam OP_LUI = 6'b001111;
   localparam OP_SPECIAL2 = 6'b011100;
   localparam OP_LB = 6'b100000;
   localparam OP_LH = 6'b100001;
@@ -102,6 +103,7 @@ module Controller(
   localparam ALU_PASSA = 4'b1000;
   localparam ALU_SLL   = 4'b1001;
   localparam ALU_SRL   = 4'b1010;
+  localparam ALU_LUI = 4'b1011;
 
   localparam BR_NONE = 3'b000;
   localparam BR_BEQ  = 3'b001;
@@ -158,6 +160,8 @@ module Controller(
       OP_ORI: begin ALUSrcB = 1'b1; RegWrite = 1'b1; ExtOp = 1'b1; ALUControl = ALU_OR; end
       OP_XORI: begin ALUSrcB = 1'b1; RegWrite = 1'b1; ExtOp = 1'b1; ALUControl = ALU_XOR; end
 
+      OP_LUI: begin ALUSrcB = 1'b1; RegWrite = 1'b1; ExtOp = 1'b1; ALUControl = ALU_LUI; RegDst = 2'b00; end
+      
       OP_LW: begin
         ALUSrcB = 1'b1; MemRead = 1'b1; MemtoReg = 2'b01;
         RegWrite = 1'b1; MemSize = 2'b10; ALUControl = ALU_ADD;
