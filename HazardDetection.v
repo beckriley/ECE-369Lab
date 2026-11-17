@@ -164,17 +164,17 @@ module HazardDetection (
     end
 
     // Ignore destination register 0: architectural $zero has no dependency.
-    wire Hazard_EX = RegWrite_EX && (DestReg_EX != 5'd0) &&
-                     ((UsesRs && (Rs_ID == DestReg_EX)) ||
-                      (UsesRt && (Rt_ID == DestReg_EX)));
+    wire Hazard_EX = (RegWrite_EX === 1'b1) && (DestReg_EX != 5'd0) &&
+                     ((UsesRs && (Rs_ID === DestReg_EX)) ||
+                      (UsesRt && (Rt_ID === DestReg_EX)));
 
-    wire Hazard_MEM = RegWrite_MEM && (DestReg_MEM != 5'd0) &&
-                      ((UsesRs && (Rs_ID == DestReg_MEM)) ||
-                       (UsesRt && (Rt_ID == DestReg_MEM)));
+    wire Hazard_MEM = (RegWrite_MEM === 1'b1) && (DestReg_MEM != 5'd0) &&
+                      ((UsesRs && (Rs_ID === DestReg_MEM)) ||
+                       (UsesRt && (Rt_ID === DestReg_MEM)));
 
-    wire Hazard_WB = RegWrite_WB && (DestReg_WB != 5'd0) &&
-                     ((UsesRs && (Rs_ID == DestReg_WB)) ||
-                      (UsesRt && (Rt_ID == DestReg_WB)));
+    wire Hazard_WB = (RegWrite_WB === 1'b1) && (DestReg_WB != 5'd0) &&
+                     ((UsesRs && (Rs_ID === DestReg_WB)) ||
+                      (UsesRt && (Rt_ID === DestReg_WB)));
 
     // Stall until none of the older stages is producing a needed operand.
     wire Stall = Hazard_EX || Hazard_MEM || Hazard_WB;
