@@ -50,6 +50,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			4'b1000: ALUResult = A; // pass A for branches
 			4'b1001: ALUResult = B << A[4:0]; // SLL
 			4'b1010: ALUResult = B >> A[4:0]; // SRL
+			4'b1011: ALUResult = B << 16;
 			default: ALUResult = 32'd0;
 		endcase
 	end
