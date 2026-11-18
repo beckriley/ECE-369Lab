@@ -70,7 +70,7 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	end
 
 	always @(posedge Clk) begin
-		if(RegWrite)
+		if(RegWrite && WriteRegister != 5'd0)
 			registers[WriteRegister] <= WriteData;
 	end
 
